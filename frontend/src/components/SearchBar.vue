@@ -1,12 +1,13 @@
 <template>
   <div>
-    <div>
-      <img alt="Weather icon" src="../assets/weather_icon.png" height="100">
+    <img alt="Weather icon" src="../assets/weather_icon.png" height="100">
+    <div id="title">
       <header>
-      <h1>Welcome to the daylight information page!</h1>
-      <p id="title">The day length can be found by inserting coordinates or selecting a place from the map.</p>
-  </header>
-</div>
+        <h1>Welcome to the daylight information page!</h1>
+        <p>The day length can be found by inserting coordinates or selecting a place from the map.</p>
+        <p><em>RULES - Latitude range: -90 to 90. Longitude range: -180 to 180. Date cannot be in the future.</em></p>
+      </header>  
+    </div>
     <form>
       <label for="x">Latitude: </label>
       <input id="x" v-model="x_coordinate" placeholder="Example: 36.7201600"/>
@@ -14,30 +15,28 @@
       <input id="y" v-model="y_coordinate" placeholder="Example: -4.4203400"/>
       <label for="date">Date: </label>
       <input id="date" v-model="addedDate" placeholder="Example: 2021-04-30"/>
-      <p><em class = "rules">RULES - Latitude range: -90 to 90. Longitude range: -180 to 180. Date cannot be in the future.</em></p>
-      
       <label for="date">Date for map: </label>
       <input id="date" v-model="mapDate" placeholder="Example: 2021-04-30"/>
-      <p><b class="day_length">{{info}}</b></p>
-      <label for="from"> From </label>
+      <label for="from"> From: </label>
       <input type="date" id="from" v-model="from">
-      <label for="to"> To </label>
+      <label for="to"> To: </label>
       <input type="date" id="to" v-model="to">
       <button type="button" @click="information">See the results</button> 
+      <p id="answer"><b class="day_length">{{info}}</b></p>
     </form>
     <l-map
         :zoom="zoom"
         :center="center"
         v-on:click="addMarker"
-        style="height: 250px; width: 250px; left: 0%"
+        style="height: 870px; width: 800px; left: 70%; position: absolute; border: 20px solid green;"
       >
         <l-tile-layer
           :url="url"
           :attribution="attribution"
         />
         <l-marker v-for="(m, index) in markers" :lat-lng="m" v-bind:key="index" @click="removeMarker(index)"/>
-      </l-map>
-      </div>
+    </l-map>	  
+  </div>
 </template>
 
 <script>
@@ -68,6 +67,7 @@ export default {
       from: null,
       to: null,
       dateArray: [],
+      dayLengthArray: []
     }
   },
   methods: {
@@ -81,14 +81,12 @@ export default {
         var toDate = new Date(this.to);
         if (fromDate <= todayDate && toDate <= todayDate) {
           if (toDate < fromDate){
-            this.info = 'Please change the order of From and To.';
+            this.info = 'Please change the order of From and To boxes.';
           } else{
             let x;
             x = latLng(this.x_coordinate, this.y_coordinate);
             this.markers.push(x);
             this.center = x;
-            //var dateArray = [];
-            //var currentDate = this.fromDate;
             while (fromDate <= toDate) {
               this.dateArray.push(fromDate.toISOString().split('T')[0]);
               fromDate.setDate(fromDate.getDate() + 1);
@@ -102,6 +100,8 @@ export default {
                       var result = response.data;
                       var finalAnswer = result.results.day_length.substring(0,2) + ' hours ' + result.results.day_length.substring(3,5) + ' minutes and ' + result.results.day_length.substring(6,8) + ' seconds.';
                       answer.push(finalAnswer);
+                      var dayLength = parseFloat(result.results.day_length.substring(0,2) + '.' + result.results.day_length.substring(3,5) + result.results.day_length.substring(6,8));
+                      this.dayLengthArray.push(dayLength)
                   })
               .catch(() => {
                   error => console.log(error)
@@ -139,7 +139,7 @@ export default {
                 })
         }
         } else if (this.x_coordinate == null || this.y_coordinate == null || this.addedDate == null){
-          this.info = 'To get the result, please fill all the bars you want.';
+          this.info = 'To get the result, please fill all the boxes you want.';
         }
       }
     },
@@ -159,74 +159,71 @@ export default {
               error => console.log(error)
               })
       }
-
     },
     removeMarker (index) {
       this.markers.splice(index, 1)
     }
   },
 }
-
 </script>
 
 <style scoped>
+img {
+    position: absolute;
+    left: 35%;
+    margin: 5px;
+    border: 3px solid lightblue;
+    width: 150px;
+    height: 150px;
+}
+
+#title {
+  position: absolute;
+  width: 100%;
+  top: 20%;
+  left: 10%;
+  margin-left: -25px;
+  margin: 20px;
+  z-index: -1;
+  font-size: 20px;
+}
 
 form {
     position: absolute;
-    top: 25%;
-    left: 20%;
-    margin-left: -25px;
-    margin: auto;
+    top: 40%;
+    left: 15%;
+    right: 45%;
+    margin: 80px;
+    background-color: yellow;
 }
-
 
 input {
-  width: 250px;
-  margin: 10px;
+  width: 400px;
+  margin: 15px;
+  background-color: gold;
+  box-shadow: 5px 5px grey;
+  text-align: center;
 }
 
-button {
-  width: 150px;
-  position: absolute;
-  top: 100%;
-  left: 30%;
-  margin: 10px;
-  
-  
-}
-
-.day_length {
-  position: absolute;
-  top: 120%;
-  left: 20%;
-  margin: 30px;
-
+label {
+  color: blue;
+  padding: 15px;
+  font-family: "Lucida Console", "Courier New", monospace;
 }
 
 p {
-  position: static;
-  margin: 0px;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 15px;
+margin: 10px;
+padding: 10px;
 }
 
-header {
-    position: absolute;
-    width: 100%;
-    top: 10%;
-    left: 30%;
-    margin-left: -25px;
-    margin: auto;
-    z-index: -1;
-    
-}
-
-.title {
-    margin-top:-20px;
-}
-
-img {
-    position: absolute;
-    top: 0;
-    left: 45%;
-    margin: auto;
+button {
+  background-color: blue;
+  border: 5px dotted red;
+  color: white;
+  padding: 25px 165px;
+  text-align: center;
+  font-size: 16px;
 }
 </style>

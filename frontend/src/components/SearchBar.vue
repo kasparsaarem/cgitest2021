@@ -66,8 +66,7 @@ export default {
       mapDate: null,
       from: null,
       to: null,
-      dateArray: [],
-      dayLengthArray: []
+      dateArray: []
     }
   },
   methods: {
@@ -100,8 +99,6 @@ export default {
                       var result = response.data;
                       var finalAnswer = result.results.day_length.substring(0,2) + ' hours ' + result.results.day_length.substring(3,5) + ' minutes and ' + result.results.day_length.substring(6,8) + ' seconds.';
                       answer.push(finalAnswer);
-                      var dayLength = parseFloat(result.results.day_length.substring(0,2) + '.' + result.results.day_length.substring(3,5) + result.results.day_length.substring(6,8));
-                      this.dayLengthArray.push(dayLength)
                   })
               .catch(() => {
                   error => console.log(error)
